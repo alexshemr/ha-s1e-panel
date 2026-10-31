@@ -1,5 +1,6 @@
 """Local integration for the open S1E panel."""
 from __future__ import annotations
+import logging
 from urllib.parse import quote
 import voluptuous as vol
 from homeassistant.core import ServiceCall
@@ -9,6 +10,9 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .client import PanelClient, PanelError
 from .const import DOMAIN, PLATFORMS
 from .coordinator import PanelCoordinator
+from .media import allowed_media, fetch_jpeg
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass, entry):
@@ -35,6 +39,19 @@ async def async_setup_entry(hass, entry):
             weather.setdefault("wind_speed_unit", hass.config.units.wind_speed_unit)
             weather.setdefault("precipitation_unit", hass.config.units.accumulated_precipitation_unit)
             body["weather"] = weather
+        # A photo with the message: taken now (the moment the doorbell rang), fitted to the screen.
+        # live: the panel keeps asking the camera for frames while the message is shown.
+        image = body.pop("image", None)
+        live = body.pop("live", False)
+        if image and call.service == "show_message":
+            try:
+                body["image"] = await fetch_jpeg(hass, image, 480, 360)
+            except Exception as err:  # the message still goes out, without the photo
+                _LOGGER.warning("S1E panel: no photo from %s (%s)", image, type(err).__name__)
+            else:
+                if live and image.startswith("camera."):
+                    allowed_media(hass).add(image)
+                    body["live"] = image
         path = "/notifications"
         if call.service == "dismiss_notification":
             path += "/" + quote(body["id"], safe="")
@@ -56,6 +73,8 @@ async def async_setup_entry(hass, entry):
             vol.Optional("ttl", default=300): vol.All(vol.Coerce(float), vol.Range(min=1, max=86400)),
             vol.Optional("priority", default="normal"): vol.In(["normal", "high"]),
             vol.Optional("type", default="info"): vol.In(["info", "success", "warning", "error"]),
+            vol.Optional("image"): vol.All(str, vol.Match(r"^(camera|image)\.[a-z0-9_]{1,240}$")),
+            vol.Optional("live", default=False): bool,
         }))
     for name in ("dismiss_notification", "clear_notifications"):
         if not hass.services.has_service(DOMAIN, name):

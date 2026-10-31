@@ -8,6 +8,7 @@ import asyncio
 import time
 from homeassistant.core import callback
 from homeassistant.helpers import area_registry as ar, device_registry as dr, entity_registry as er
+from .media import allowed_media, fetch_jpeg
 
 SERVICES = {
     "light": {"turn_on", "turn_off", "toggle"},
@@ -113,6 +114,15 @@ class PanelBridge:
             if len(self.subscriptions) >= 80:
                 raise ValueError
             return await self.subscribe(request_id, msg)
+        if kind == "s1e/media":
+            # A picture for the screen: only cameras and images the panel shows (subscribed) or that
+            # a service call put on it (a doorbell photo kept live).
+            entity_id = msg["entity_id"]
+            shown = set().union(*self.selected.values()) if self.selected else set()
+            if entity_id not in shown and entity_id not in allowed_media(self.hass):
+                raise ValueError
+            async with asyncio.timeout(20):
+                return await fetch_jpeg(self.hass, entity_id, msg["width"], msg["height"], msg.get("fit", "contain"))
         if kind == "call_service":
             entity_id = msg["target"]["entity_id"]
             domain, service, data = msg["domain"], msg["service"], msg.get("service_data", {})

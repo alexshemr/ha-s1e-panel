@@ -55,6 +55,18 @@ show_message:
           max: 86400
           unit_of_measurement: s
           mode: box
+    image:
+      name: Photo
+      description: A camera or image entity; its picture is taken when the message is sent.
+      selector:
+        entity:
+          domain: [camera, image]
+    live:
+      name: Live camera
+      description: Keep refreshing the camera picture while the message is on screen.
+      default: false
+      selector:
+        boolean: {}
     type:
       name: Appearance
       default: info

@@ -307,6 +307,36 @@ data:
 ```
 
 Полная очистка: `s1e_panel.clear_notifications`, только `device_id`.
+
+## Звонок в дверь: фото звонящего
+
+Интеграция 0.5.0 и прошивка 0.7.0. `image` — сущность `camera.*` или `image.*`:
+снимок делается в момент вызова, уменьшается под экран (до 480 × 360) и
+приходит на панель вместе с сообщением. `live: true` для камеры — пока
+сообщение на экране, панель раз в секунду обновляет кадр («Эфир»).
+
+```yaml
+alias: Звонок в дверь на панели
+triggers:
+  - trigger: state
+    entity_id: binary_sensor.doorbell_button
+    to: "on"
+actions:
+  - action: s1e_panel.show_message
+    data:
+      device_id: PANEL_DEVICE_ID
+      id: doorbell
+      title: Звонок в дверь
+      text: Кто-то у двери
+      image: camera.doorbell
+      live: true
+      priority: high
+      duration: 45
+```
+
+Панель показывает фото только тех камер, что есть на её карточках, или тех,
+что передал вызов `show_message`. Видео идёт кадрами (1–2 в секунду): потоковое
+видео панель не декодирует.
 # Постоянная заставка по уровню мелких частиц
 
 Для интеграции 0.3.0 и прошивки 0.4.0. Замените `select.s1e_screensaver` и
