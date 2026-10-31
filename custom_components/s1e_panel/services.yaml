@@ -1,0 +1,92 @@
+show_message:
+  name: Show message
+  description: Show a temporary message on an S1E panel. Normal messages wait for the screensaver.
+  fields:
+    device_id:
+      name: Panel
+      required: true
+      selector:
+        device:
+          integration: s1e_panel
+    text:
+      name: Message
+      required: true
+      selector:
+        text:
+          multiline: true
+    id:
+      name: Message ID
+      selector:
+        text: {}
+    title:
+      name: Title
+      selector:
+        text: {}
+    weather:
+      name: Weather forecast object
+      selector:
+        object: {}
+    background:
+      name: Background
+      default: auto
+      selector:
+        select:
+          options: [auto, weather, plain]
+    icon:
+      name: Icon
+      default: information
+      selector:
+        icon: {}
+    duration:
+      name: Visible duration
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 3600
+          unit_of_measurement: s
+          mode: box
+    ttl:
+      name: Expire after
+      default: 300
+      selector:
+        number:
+          min: 1
+          max: 86400
+          unit_of_measurement: s
+          mode: box
+    type:
+      name: Appearance
+      default: info
+      selector:
+        select:
+          options: [info, success, warning, error]
+    priority:
+      name: Priority
+      default: normal
+      selector:
+        select:
+          options: [normal, high]
+
+dismiss_notification:
+  name: Dismiss notification
+  description: Cancel an active or queued notification by its ID.
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: s1e_panel
+    id:
+      required: true
+      selector:
+        text: {}
+clear_notifications:
+  name: Clear notifications
+  description: Cancel all active and queued notifications.
+  fields:
+    device_id:
+      required: true
+      selector:
+        device:
+          integration: s1e_panel

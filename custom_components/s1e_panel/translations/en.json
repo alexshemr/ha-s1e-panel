@@ -1,0 +1,140 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect your S1E panel",
+        "description": "Create a Home Assistant key in the panel's browser editor. Copy the certificate fingerprint shown in settings.",
+        "data": {
+          "url": "Panel HTTPS address",
+          "token": "Pairing key",
+          "fingerprint": "Certificate SHA-256 fingerprint"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Renew pairing key",
+        "data": {
+          "url": "Panel HTTPS address",
+          "token": "Pairing key",
+          "fingerprint": "Certificate SHA-256 fingerprint"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect. Check the address and certificate fingerprint.",
+      "invalid_auth": "The pairing key was rejected."
+    },
+    "abort": {
+      "already_configured": "This panel is already configured.",
+      "wrong_device": "This is a different panel.",
+      "reauth_successful": "Pairing key updated."
+    }
+  },
+  "entity": {
+    "light": {
+      "screen": {
+        "name": "Screen"
+      }
+    },
+    "switch": {
+      "relay": {
+        "name": "Relay {channel}"
+      }
+    },
+    "sensor": {
+      "version": {
+        "name": "Firmware version"
+      },
+      "wifi": {
+        "name": "Wi-Fi network"
+      },
+      "screen_mode": {
+        "name": "Screen mode"
+      },
+      "ip_address": {
+        "name": "Panel IP address"
+      }
+    },
+    "binary_sensor": {
+      "ha_connection": {
+        "name": "Home Assistant connection"
+      },
+      "night_mode": {
+        "name": "Night mode"
+      }
+    },
+    "select": {
+      "screensaver": {
+        "name": "Screensaver",
+        "state": {
+          "clock": "Clock",
+          "sensors": "Sensors",
+          "weather": "Weather",
+          "photo": "Photos",
+          "shuffle": "Shuffle"
+        }
+      }
+    }
+  },
+  "services": {
+    "show_message": {
+      "name": "Show message",
+      "description": "Show message",
+      "fields": {
+        "device_id": {
+          "name": "Panel"
+        },
+        "text": {
+          "name": "Message"
+        },
+        "id": {
+          "name": "Message ID"
+        },
+        "title": {
+          "name": "Title"
+        },
+        "weather": {
+          "name": "Weather forecast object"
+        },
+        "background": {
+          "name": "Background"
+        },
+        "icon": {
+          "name": "Icon"
+        },
+        "duration": {
+          "name": "Visible duration"
+        },
+        "ttl": {
+          "name": "Expire after"
+        },
+        "type": {
+          "name": "Appearance"
+        },
+        "priority": {
+          "name": "Priority"
+        }
+      }
+    },
+    "dismiss_notification": {
+      "name": "Dismiss notification",
+      "description": "Dismiss notification",
+      "fields": {
+        "device_id": {
+          "name": "Panel"
+        },
+        "id": {
+          "name": "Message ID"
+        }
+      }
+    },
+    "clear_notifications": {
+      "name": "Clear notifications",
+      "description": "Clear notifications",
+      "fields": {
+        "device_id": {
+          "name": "Panel"
+        }
+      }
+    }
+  }
+}

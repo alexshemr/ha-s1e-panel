@@ -1,0 +1,14 @@
+{
+  "domain": "s1e_panel",
+  "name": "S1E Panel",
+  "codeowners": [
+    "@alexshemr"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/alexshemr/ha-s1e-panel",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/alexshemr/ha-s1e-panel/issues",
+  "requirements": [],
+  "version": "0.3.0"
+}

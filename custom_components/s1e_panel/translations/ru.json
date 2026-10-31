@@ -1,0 +1,140 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Подключение панели S1E",
+        "description": "Создайте отдельный ключ Home Assistant в браузерном редакторе панели. Скопируйте SHA-256 сертификата из настроек.",
+        "data": {
+          "url": "HTTPS-адрес панели",
+          "token": "Ключ сопряжения",
+          "fingerprint": "SHA-256 сертификата"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Обновление ключа сопряжения",
+        "data": {
+          "url": "HTTPS-адрес панели",
+          "token": "Ключ сопряжения",
+          "fingerprint": "SHA-256 сертификата"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Не удалось подключиться. Проверьте адрес и отпечаток сертификата.",
+      "invalid_auth": "Панель отклонила ключ сопряжения."
+    },
+    "abort": {
+      "already_configured": "Эта панель уже настроена.",
+      "wrong_device": "Это другая панель.",
+      "reauth_successful": "Ключ сопряжения обновлён."
+    }
+  },
+  "entity": {
+    "light": {
+      "screen": {
+        "name": "Экран"
+      }
+    },
+    "switch": {
+      "relay": {
+        "name": "Реле {channel}"
+      }
+    },
+    "sensor": {
+      "version": {
+        "name": "Версия прошивки"
+      },
+      "wifi": {
+        "name": "Сеть Wi-Fi"
+      },
+      "screen_mode": {
+        "name": "Режим экрана"
+      },
+      "ip_address": {
+        "name": "IP-адрес панели"
+      }
+    },
+    "binary_sensor": {
+      "ha_connection": {
+        "name": "Подключение к Home Assistant"
+      },
+      "night_mode": {
+        "name": "Ночной режим"
+      }
+    },
+    "select": {
+      "screensaver": {
+        "name": "Заставка",
+        "state": {
+          "clock": "Часы",
+          "sensors": "Датчики",
+          "weather": "Погода",
+          "photo": "Фото",
+          "shuffle": "Перемешивание"
+        }
+      }
+    }
+  },
+  "services": {
+    "show_message": {
+      "name": "Показать сообщение",
+      "description": "Показать сообщение",
+      "fields": {
+        "device_id": {
+          "name": "Панель"
+        },
+        "text": {
+          "name": "Текст"
+        },
+        "id": {
+          "name": "Идентификатор сообщения"
+        },
+        "title": {
+          "name": "Заголовок"
+        },
+        "weather": {
+          "name": "Объект прогноза погоды"
+        },
+        "background": {
+          "name": "Фон"
+        },
+        "icon": {
+          "name": "Значок"
+        },
+        "duration": {
+          "name": "Длительность показа"
+        },
+        "ttl": {
+          "name": "Срок актуальности"
+        },
+        "type": {
+          "name": "Оформление"
+        },
+        "priority": {
+          "name": "Приоритет"
+        }
+      }
+    },
+    "dismiss_notification": {
+      "name": "Отменить уведомление",
+      "description": "Отменить уведомление",
+      "fields": {
+        "device_id": {
+          "name": "Панель"
+        },
+        "id": {
+          "name": "Идентификатор сообщения"
+        }
+      }
+    },
+    "clear_notifications": {
+      "name": "Очистить уведомления",
+      "description": "Очистить уведомления",
+      "fields": {
+        "device_id": {
+          "name": "Панель"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>S1E Panel</title>
+  <rect width="256" height="256" rx="56" fill="#0B141A"/>
+  <g fill="none" stroke="#98E2FE" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="44" y="44" width="168" height="168" rx="30" stroke-width="11"/>
+    <rect x="132" y="76" width="48" height="48" rx="12" stroke-width="7"/>
+    <rect x="76" y="132" width="48" height="48" rx="12" stroke-width="7"/>
+    <rect x="132" y="132" width="48" height="48" rx="12" stroke-width="7"/>
+    <path d="M147 156h18" stroke-width="7"/>
+  </g>
+  <rect x="72.5" y="72.5" width="55" height="55" rx="15" fill="#98E2FE"/>
+  <circle cx="100" cy="100" r="9" fill="#0B141A"/>
+</svg>
