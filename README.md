@@ -51,7 +51,7 @@ mDNS обнаруживает панель в одной локальной се
 
 ## Установка из ZIP
 
-Скачайте `ha-s1e-panel-0.4.0.zip` из Releases. Скопируйте каталог
+Скачайте `ha-s1e-panel-0.4.1.zip` из Releases. Скопируйте каталог
 `custom_components/s1e_panel` в каталог конфигурации HA и перезапустите HA.
 Архив `-source.zip` предназначен для исходников отдельного репозитория.
 
@@ -72,6 +72,8 @@ the old token is then removed from the panel, but not revoked in the HA profile.
 Discovery uses IPv4 mDNS on the local network. Initial certificate trust is
 established on that network and subsequent certificate changes are rejected.
 
-MIT. Tested against Home Assistant 2026.10.4. Validation and device deployment
+MIT. Minimum supported Home Assistant: 2026.10.1. CI covers 2026.10.1 and 2026.10.4. Validation and device deployment
 results are recorded with each release. Inclusion in the default HACS catalog
 is a separate step; use the custom repository installation above.
+
+Версия 0.4.1 исправляет минимальную версию HA в HACS: 2026.10.1. Для нового подключения рекомендуется 0.4.1+.
