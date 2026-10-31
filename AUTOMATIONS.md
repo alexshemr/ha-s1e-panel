@@ -1,13 +1,13 @@
-# Примеры автоматизаций
+# Automation examples
 
-Замените `light.panel_screen`, `binary_sensor.panel_night_mode`, `binary_sensor.room_presence`, `cover.living_room`, `weather.home` и `PANEL_DEVICE_ID` своими значениями. ID устройства можно не искать: шаблон `{{ device_id('light.panel_screen') }}` возвращает его по любой сущности панели. Явный ID можно получить, выбрав панель в визуальном редакторе действия «Показать сообщение» и открыв YAML.
+Replace `light.panel_screen`, `binary_sensor.panel_night_mode`, `binary_sensor.room_presence`, `cover.living_room`, `weather.home` and `PANEL_DEVICE_ID` with your own. You don't have to look up the device ID: the template `{{ device_id('light.panel_screen') }}` returns it from any panel entity. To see the ID itself, pick the panel in the visual editor of the **Show message** action and switch to YAML.
 
-## Подсветка по присутствию
+## Screen on with presence
 
-Автоматизация повторно выставляет состояние при старте HA и восстановлении доступности экрана. Ночное расписание панели имеет приоритет над `light.turn_on`.
+The automation sets the state again when Home Assistant starts and when the screen becomes available. The panel's night schedule takes priority over `light.turn_on`.
 
 ```yaml
-alias: Подсветка панели по присутствию
+alias: Panel screen follows presence
 triggers:
   - trigger: state
     entity_id: binary_sensor.room_presence
@@ -36,23 +36,23 @@ actions:
 mode: restart
 ```
 
-## Закрытие шторы: погода на завтра с советом
+## Curtain closes: tomorrow's weather with advice
 
-Вечером, с 20:00 до 01:00, при закрытии шторы панель показывает прогноз на завтра на анимированном погодном фоне (та же сцена, что на заставке «Погода»). Заголовок и совет автоматизация составляет сама по состоянию погоды: зонт при дожде или вероятности осадков от 50 %, тёплая одежда при холоде, вода в жару, предупреждение о ветре. У каждого состояния несколько вариантов фраз, они выбираются случайно. Панель сама советов не добавляет.
+In the evening, from 20:00 to 01:00, closing the curtain shows tomorrow's forecast on the animated weather background (the same scene as the Weather screensaver). The automation writes the title and the advice from the weather: an umbrella for rain or a 50 % chance of it, warm clothes for cold, water for heat, a warning for wind. Each condition has a few phrasings picked at random. The panel adds no advice of its own.
 
-- Сообщение важное (`priority: high`): оно зажигает экран, в том числе в ночном режиме панели.
-- Показ длится 15 минут, а если на панели действует ночной режим — 5 минут.
-- После полуночи «завтра» — уже наступивший день. Прогноз выбирается по дате, а не по номеру в списке: у Met.no первым идёт сегодняшний день.
-- Если погодная интеграция не умеет дневной прогноз (`daily`), используется «день/ночь» (`twice_daily`).
-- На панель передаются только известные поля прогноза, числа — только числами. Так `null` или строка в прогнозе не приведёт к отказу панели.
-- Если прогноза нет, панель желает спокойной ночи на обычном фоне, а причина записывается в журнал HA.
+- The message is important (`priority: high`): it turns the screen on, also during the panel's night mode.
+- It stays for 15 minutes, or 5 minutes while the panel's night mode is on.
+- After midnight "tomorrow" is the day that has already begun. The forecast is picked by date, not by position: Met.no lists today first.
+- If the weather integration has no daily forecast, the day/night forecast (`twice_daily`) is used.
+- Only known forecast fields are sent, numbers only as numbers, so a `null` or a string in the forecast cannot upset the panel.
+- With no forecast the panel wishes a good night on a plain background and the reason goes to the HA logbook.
 
 ```yaml
-alias: Погода на завтра при закрытии шторы
+alias: Tomorrow's weather when the curtain closes
 description: >-
-  С 20:00 до 01:00 при закрытии cover.living_room показывает на панели
-  прогноз на завтра на погодном фоне с советом по погоде. Уведомление важное
-  (зажигает экран): 15 минут, а в ночном режиме панели — 5 минут.
+  From 20:00 to 01:00, when cover.living_room closes, shows tomorrow's
+  forecast on the panel's weather background with advice. The message is
+  important (turns the screen on): 15 minutes, 5 in the panel's night mode.
 mode: restart
 
 triggers:
@@ -64,14 +64,14 @@ triggers:
       - unknown
 
 conditions:
-  # Интервал переходит через полночь — HA это поддерживает.
+  # The window crosses midnight; HA supports that.
   - condition: time
     after: "20:00:00"
     before: "01:00:00"
 
 actions:
   - variables:
-      # Своя погодная сущность. Если такой нет — берётся первая weather.* в системе.
+      # Your weather entity. Without one, the first weather.* in the system is used.
       weather_preferred: weather.home
       weather_entity: >-
         {{ weather_preferred if has_value(weather_preferred)
@@ -80,10 +80,10 @@ actions:
       night_sensor: binary_sensor.panel_night_mode
       panel_device: "{{ device_id('light.panel_screen') }}"
       forecast_response: {}
-      # После полуночи «завтра» — это уже наступивший день.
+      # After midnight "tomorrow" is the day that has already begun.
       target_day: >-
         {{ (now().date() if now().hour < 12 else (now() + timedelta(days=1)).date()) | string }}
-      # Ночной режим панели (экран погашен по расписанию) → живёт 5 минут, иначе 15.
+      # Panel night mode (screen off on schedule) → 5 minutes, otherwise 15.
       lifetime: "{{ 300 if is_state(night_sensor, 'on') else 900 }}"
 
   - action: weather.get_forecasts
@@ -94,7 +94,7 @@ actions:
       type: daily
     response_variable: forecast_response
 
-  # Не все погодные интеграции умеют daily — тогда пробуем «день/ночь».
+  # Not every weather integration has a daily forecast: try day/night then.
   - if:
       - condition: template
         value_template: >-
@@ -110,8 +110,8 @@ actions:
 
   - variables:
       forecast_items: "{{ forecast_response.get(weather_entity, {}).get('forecast', []) }}"
-      # День ищем по дате (у Met.no первым идёт сегодня). Для «день/ночь» берём дневную часть.
-      # Если точной даты нет — первый день после сегодняшнего.
+      # Find the day by date (Met.no lists today first). For day/night take the daytime part.
+      # Without an exact date, the first day after today.
       tomorrow: >-
         {% set ns = namespace(exact={}, after={}) %}
         {% set today = now().date() | string %}
@@ -128,14 +128,14 @@ actions:
         {% endfor %}
         {{ ns.exact if ns.exact else ns.after }}
       fail_reason: >-
-        {% if not has_value(weather_entity) %}погодная сущность {{ weather_entity }} не найдена или недоступна
-        {% elif forecast_items | length == 0 %}{{ weather_entity }} не вернула ни daily, ни twice_daily прогноз
-        {% else %}в прогнозе {{ weather_entity }} нет дня {{ target_day }} (первая дата: {{ forecast_items[0].get('datetime') }})
+        {% if not has_value(weather_entity) %}weather entity {{ weather_entity }} not found or unavailable
+        {% elif forecast_items | length == 0 %}{{ weather_entity }} returned neither a daily nor a twice_daily forecast
+        {% else %}the forecast of {{ weather_entity }} has no {{ target_day }} (first date: {{ forecast_items[0].get('datetime') }})
         {% endif %}
 
       cond: "{{ tomorrow.get('condition', 'unknown') if tomorrow else 'unknown' }}"
 
-      # Температура в °C (если в HA °F — переводим).
+      # Temperature in °C (converted when HA uses °F).
       t_unit: "{{ state_attr(weather_entity, 'temperature_unit') or '°C' }}"
       t_high: >-
         {% set t = tomorrow.get('temperature') if tomorrow else none %}
@@ -144,7 +144,7 @@ actions:
         {% set t = tomorrow.get('templow', tomorrow.get('temperature')) if tomorrow else none %}
         {% if t is number %}{{ ((t - 32) * 5 / 9) | round(0) if t_unit == '°F' else t | round(0) }}{% else %}none{% endif %}
 
-      # Ветер в м/с (Met.no отдаёт км/ч).
+      # Wind in m/s (Met.no reports km/h).
       wind_ms: >-
         {% set w = tomorrow.get('wind_speed') if tomorrow else none %}
         {% set u = state_attr(weather_entity, 'wind_speed_unit') or 'km/h' %}
@@ -156,64 +156,64 @@ actions:
 
       msg_title: >-
         {% set titles = {
-          'sunny':           ['Завтра солнечный денёк', 'Завтра светит солнце', 'Завтра будет ясно и солнечно'],
-          'clear-night':     ['Завтра ясно', 'Завтра безоблачно'],
-          'partlycloudy':    ['Завтра солнце с облачками', 'Завтра переменная облачность'],
-          'cloudy':          ['Завтра пасмурно', 'Завтра серенький денёк'],
-          'fog':             ['Завтра туманное утро', 'Завтра всё в тумане'],
-          'rainy':           ['Завтра дождливый день', 'Завтра будет дождик'],
-          'pouring':         ['Завтра ливень', 'Завтра льёт как из ведра'],
-          'lightning':       ['Завтра гроза'],
-          'lightning-rainy': ['Завтра гроза с дождём'],
-          'snowy':           ['Завтра снежный денёк', 'Завтра будет снег'],
-          'snowy-rainy':     ['Завтра мокрый снег', 'Завтра слякотно'],
-          'hail':            ['Завтра обещают град'],
-          'windy':           ['Завтра ветрено', 'Завтра сильный ветер'],
-          'windy-variant':   ['Завтра облачно и ветрено'],
-          'exceptional':     ['Завтра необычная погода']
+          'sunny':           ['A sunny day tomorrow', 'Sunshine tomorrow', 'Clear and sunny tomorrow'],
+          'clear-night':     ['Clear skies tomorrow', 'Not a cloud tomorrow'],
+          'partlycloudy':    ['Sun and clouds tomorrow', 'Partly cloudy tomorrow'],
+          'cloudy':          ['Overcast tomorrow', 'A grey day tomorrow'],
+          'fog':             ['A foggy morning tomorrow', 'Fog tomorrow'],
+          'rainy':           ['A rainy day tomorrow', 'Rain tomorrow'],
+          'pouring':         ['Heavy rain tomorrow', 'Pouring tomorrow'],
+          'lightning':       ['Thunderstorm tomorrow'],
+          'lightning-rainy': ['Thunderstorm and rain tomorrow'],
+          'snowy':           ['A snowy day tomorrow', 'Snow tomorrow'],
+          'snowy-rainy':     ['Sleet tomorrow', 'Slush tomorrow'],
+          'hail':            ['Hail expected tomorrow'],
+          'windy':           ['Windy tomorrow', 'Strong wind tomorrow'],
+          'windy-variant':   ['Cloudy and windy tomorrow'],
+          'exceptional':     ['Unusual weather tomorrow']
         } %}
-        {{ titles.get(cond, ['Спокойной ночи']) | random }}
+        {{ titles.get(cond, ['Good night']) | random }}
 
       msg_text: >-
         {% set phrases = {
-          'sunny':           ['Отличный повод для прогулки!', 'Можно планировать что-то на улице.', 'Солнце зарядит на весь день.'],
-          'clear-night':     ['Отличный повод для прогулки!'],
-          'partlycloudy':    ['Хороший день, чтобы выбраться на улицу.', 'Солнце будет выглядывать из-за облаков.'],
-          'cloudy':          ['Солнца не обещают, но унывать не стоит.', 'Хороший день для уютных дел.'],
-          'fog':             ['За рулём будь внимательнее — видимость плохая.'],
-          'rainy':           ['Возьми с собой зонтик!', 'Зонтик — твой лучший друг завтра.', 'Не забудь зонт, лужи будут ждать.'],
-          'pouring':         ['Зонт покрепче и непромокаемая обувь обязательны.'],
-          'lightning':       ['Без нужды лучше не выходить.'],
-          'lightning-rainy': ['Возьми зонт, а без нужды лучше не выходить.'],
-          'snowy':           ['Тёплые ботинки и варежки обязательны. Можно лепить снеговика!', 'Выходи пораньше — на дорогах снег.'],
-          'snowy-rainy':     ['Непромокаемая обувь и зонт пригодятся.'],
-          'hail':            ['Лучше переждать под крышей, а машину поставить в укрытие.'],
-          'windy':           ['Держи шапку крепче!'],
-          'windy-variant':   ['Держи шапку крепче!'],
-          'exceptional':     ['Проверь прогноз утром и будь осторожнее.']
+          'sunny':           ['A great reason for a walk!', 'Plan something outdoors.', 'The sun will keep you going all day.'],
+          'clear-night':     ['A great reason for a walk!'],
+          'partlycloudy':    ['A good day to get outside.', 'The sun will peek through the clouds.'],
+          'cloudy':          ['No sun promised, but no reason to be glum.', 'A good day for cosy things.'],
+          'fog':             ['Drive carefully, visibility will be poor.'],
+          'rainy':           ['Take an umbrella!', 'Your umbrella is your best friend tomorrow.', 'Don\'t forget the umbrella, the puddles are waiting.'],
+          'pouring':         ['A sturdy umbrella and waterproof shoes are a must.'],
+          'lightning':       ['Better stay in unless you must go out.'],
+          'lightning-rainy': ['Take an umbrella, and stay in unless you must go out.'],
+          'snowy':           ['Warm boots and mittens are a must. Snowman time!', 'Leave early, the roads will be snowy.'],
+          'snowy-rainy':     ['Waterproof shoes and an umbrella will help.'],
+          'hail':            ['Better wait it out indoors and park the car under cover.'],
+          'windy':           ['Hold on to your hat!'],
+          'windy-variant':   ['Hold on to your hat!'],
+          'exceptional':     ['Check the forecast in the morning and take care.']
         } %}
         {% set rain_family = ['rainy', 'pouring', 'lightning-rainy', 'snowy-rainy', 'hail'] %}
-        {% set out = [phrases.get(cond, ['Хорошего отдыха!']) | random] %}
+        {% set out = [phrases.get(cond, ['Have a good rest!']) | random] %}
         {% if cond not in rain_family and rain_prob | float(0) >= 50 %}
-          {% set out = out + ['Вероятность дождя ' ~ rain_prob | int ~ '% — зонтик лучше взять.'] %}
+          {% set out = out + [rain_prob | int ~ '% chance of rain, better take an umbrella.'] %}
         {% endif %}
         {% if t_low is number and t_low <= -10 %}
-          {% set out = out + ['Мороз до ' ~ t_low | int ~ '° — одевайся очень тепло.'] %}
+          {% set out = out + ['Frost down to ' ~ t_low | int ~ '°, dress very warmly.'] %}
         {% elif t_low is number and t_low <= 5 and cond != 'snowy' %}
-          {% set out = out + ['Будет холодно, оденься потеплее.'] %}
+          {% set out = out + ['It will be cold, dress warmly.'] %}
         {% elif t_high is number and t_high >= 28 %}
-          {% set out = out + ['Жарко — возьми с собой воду.'] %}
+          {% set out = out + ['Hot: take some water with you.'] %}
         {% endif %}
         {% if cond not in ['windy', 'windy-variant'] and wind_ms | float(0) >= 10 %}
-          {% set out = out + ['Ветер до ' ~ wind_ms | int ~ ' м/с.'] %}
+          {% set out = out + ['Wind up to ' ~ wind_ms | int ~ ' m/s.'] %}
         {% endif %}
         {% if cond == 'sunny' and uv | float(0) >= 6 %}
-          {% set out = out + ['Не забудь солнцезащитный крем.'] %}
+          {% set out = out + ['Don\'t forget the sunscreen.'] %}
         {% endif %}
         {{ out[:2] | join(' ') }}
 
-      # На панель отправляем только знакомые поля: числа — только настоящими числами,
-      # влажность и вероятность осадков — в пределах 0–100. null и строки отбрасываем.
+      # Only known fields go to the panel: numbers only as real numbers,
+      # humidity and chance of rain within 0–100. Nulls and strings are dropped.
       weather_payload: >-
         {% set ns = namespace(pairs=[('entity_id', weather_entity), ('night', false)]) %}
         {% for k in ['condition', 'datetime'] %}
@@ -240,7 +240,7 @@ actions:
         }.get(cond, 'mdi:weather-night') }}
 
   - choose:
-      # Прогноз есть — уведомление на анимированном погодном фоне (сцена как на заставке).
+      # A forecast: the message on the animated weather background (the screensaver's scene).
       - conditions: "{{ tomorrow | length > 0 }}"
         sequence:
           - action: s1e_panel.show_message
@@ -250,25 +250,25 @@ actions:
               title: "{{ msg_title }}"
               text: "{{ msg_text }}"
               icon: "{{ msg_icon }}"
-              # Дневная сцена: прогноз на завтрашний день.
+              # Daytime scene: tomorrow's forecast.
               weather: "{{ weather_payload }}"
               background: weather
-              priority: high          # важное — зажигает экран, в том числе ночью
+              priority: high          # important: turns the screen on, also at night
               duration: "{{ lifetime }}"
               ttl: "{{ lifetime }}"
-    # Прогноз недоступен — просто пожелание на обычном фоне.
+    # No forecast: just a good-night wish on a plain background.
     default:
       - action: logbook.log
         data:
-          name: Погода на панели
-          message: "Прогноз на завтра не найден: {{ fail_reason }}"
+          name: Panel weather
+          message: "No forecast for tomorrow: {{ fail_reason }}"
           entity_id: cover.living_room
       - action: s1e_panel.show_message
         data:
           device_id: "{{ panel_device }}"
           id: curtain_weather_tomorrow
-          title: Спокойной ночи
-          text: Прогноз на завтра пока недоступен. Хорошего отдыха!
+          title: Good night
+          text: Tomorrow's forecast is not available yet. Have a good rest!
           icon: mdi:weather-night
           background: plain
           priority: high
@@ -276,28 +276,28 @@ actions:
           ttl: "{{ lifetime }}"
 ```
 
-### Если уведомление не появляется
+### If the message does not appear
 
-1. **Инструменты разработчика → Шаблон** — проверьте сущности:
+1. **Developer tools → Template**: check the entities:
 
    ```jinja
-   Панель: {{ device_id('light.panel_screen') }}
+   Panel: {{ device_id('light.panel_screen') }}
    {% for e in device_entities(device_id('light.panel_screen')) %}
    - {{ e }} = {{ states(e) }}
    {% endfor %}
-   Погода:
+   Weather:
    {% for s in states.weather %}
    - {{ s.entity_id }} = {{ s.state }}, features={{ s.attributes.supported_features }}
    {% endfor %}
    ```
 
-   В `features` 1 — дневной прогноз, 2 — почасовой, 4 — «день/ночь»; значения складываются.
+   In `features`, 1 is the daily forecast, 2 hourly, 4 day/night; the values add up.
 
-2. **Инструменты разработчика → Действия** — выполните `weather.get_forecasts` с `type: daily` для своей погодной сущности и убедитесь, что в ответе есть завтрашняя дата.
-3. Там же отправьте простое `s1e_panel.show_message` с `priority: high`, чтобы проверить связь с панелью.
-4. **Настройки → Автоматизации → ⋮ → Трассировки** — последний запуск покажет шаг с ошибкой и значения переменных.
+2. **Developer tools → Actions**: run `weather.get_forecasts` with `type: daily` for your weather entity and check that tomorrow's date is in the answer.
+3. There, send a plain `s1e_panel.show_message` with `priority: high` to check the connection to the panel.
+4. **Settings → Automations → ⋮ → Traces**: the last run shows the failing step and the variables.
 
-## Отмена сообщения
+## Dismiss a message
 
 ```yaml
 action: s1e_panel.dismiss_notification
@@ -306,17 +306,14 @@ data:
   id: door_open
 ```
 
-Полная очистка: `s1e_panel.clear_notifications`, только `device_id`.
+To clear everything: `s1e_panel.clear_notifications` with only `device_id`.
 
-## Звонок в дверь: фото звонящего
+## Doorbell: a photo of who is at the door
 
-Интеграция 0.5.0 и прошивка 0.7.0. `image` — сущность `camera.*` или `image.*`:
-снимок делается в момент вызова, уменьшается под экран (до 480 × 360) и
-приходит на панель вместе с сообщением. `live: true` для камеры — пока
-сообщение на экране, панель раз в секунду обновляет кадр («Эфир»).
+Integration 0.5.0 and firmware 0.7.0. `image` is a `camera.*` or `image.*` entity: the snapshot is taken when the action runs, fitted to the screen (up to 480 × 360) and sent with the message. With `live: true` for a camera, the panel refreshes the picture every second while the message is on screen ("Live").
 
 ```yaml
-alias: Звонок в дверь на панели
+alias: Doorbell on the panel
 triggers:
   - trigger: state
     entity_id: binary_sensor.doorbell_button
@@ -326,27 +323,22 @@ actions:
     data:
       device_id: PANEL_DEVICE_ID
       id: doorbell
-      title: Звонок в дверь
-      text: Кто-то у двери
+      title: Doorbell
+      text: Someone is at the door
       image: camera.doorbell
       live: true
       priority: high
       duration: 45
 ```
 
-Панель показывает фото только тех камер, что есть на её карточках, или тех,
-что передал вызов `show_message`. Видео идёт кадрами (1–2 в секунду): потоковое
-видео панель не декодирует.
-# Постоянная заставка по уровню мелких частиц
+The panel shows pictures only from cameras on its cards or from cameras passed to `show_message`. Video comes as frames (1–2 per second); the panel does not decode video streams.
 
-Для интеграции 0.3.0 и прошивки 0.4.0. Замените `select.s1e_screensaver` и
-`sensor.room_pm25` своими сущностями. Создайте числовые помощники
-`input_number.dust_alert_threshold` и `input_number.dust_clear_threshold`;
-порог возврата задайте ниже порога включения. Значения и задержки выбираете вы.
-В редакторе панели привяжите нужные датчики к заставке «Датчики».
+## Keep the readings screensaver while fine dust is high
+
+Integration 0.3.0 and firmware 0.4.0 or newer. Replace `select.s1e_screensaver` and `sensor.room_pm25` with your entities. Create the number helpers `input_number.dust_alert_threshold` and `input_number.dust_clear_threshold`, with the clear threshold below the alert threshold. The values and delays are yours to choose. In the panel editor, bind the sensors you want to the **Home essentials** screensaver.
 
 ```yaml
-alias: Микроклимат на панели при повышении мелких частиц
+alias: Readings on the panel while fine dust is high
 triggers:
   - trigger: numeric_state
     entity_id: sensor.room_pm25
@@ -367,9 +359,4 @@ actions:
 mode: restart
 ```
 
-Здесь обычная заставка — `weather`; замените её при необходимости. Обратное
-переключение задаётся этой автоматизацией, таймера возврата у панели нет.
-Выбор сохраняется после перезапуска панели. Триггеры `numeric_state` с `for`
-не сохраняют отсчёт через перезапуск HA: если нужно повторно оценивать уже
-превышенный показатель после запуска HA, добавьте отдельную автоматизацию запуска.
-Ночной режим и выключение экрана из HA продолжают действовать.
+Here the usual screensaver is `weather`; change it if needed. This automation switches back; the panel has no return timer of its own. The choice survives a panel restart. `numeric_state` triggers with `for` do not keep counting across an HA restart: to re-check an already high reading after HA starts, add a separate start-up automation. The night mode and screen-off from HA still apply.

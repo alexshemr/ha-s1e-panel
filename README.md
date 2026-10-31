@@ -1,88 +1,44 @@
-# S1E Panel — Home Assistant
+<p align="center"><img src="custom_components/s1e_panel/brand/icon.png" width="96" alt=""></p>
 
-Локальная интеграция панели Aqara S1E с Home Assistant. Управление экраном,
-яркостью, реле и заставками, диагностика и уведомления из автоматизаций.
+# S1E Panel for Home Assistant
 
-## Установка через HACS
+The Home Assistant integration for the [S1E Panel](https://github.com/alexshemr/s1e-panel) firmware on the Aqara S1E wall panel. It connects the panel to your home without a Home Assistant token and gives Home Assistant the panel's screen, brightness, relays, screensavers, diagnostics and notifications — with photos.
 
-1. В HACS → Custom repositories добавьте `https://github.com/alexshemr/ha-s1e-panel`, категория **Integration**.
-2. Установите **S1E Panel** и перезапустите Home Assistant.
-3. В **Настройки → Устройства и службы** добавьте обнаруженную панель.
-4. Нажмите **Разрешить: Home Assistant** на самой панели.
+## Install
 
-Для нового способа нужны прошивка **0.5.0+** и интеграция **0.4.0+**.
-Панель должна заранее подключиться к вашей Wi-Fi сети. Адрес HA,
-долгоживущий токен и ключ сопряжения вручную вводить не требуется.
-HACS устанавливает компонент; обнаружение и подключение выполняет интеграция.
-Если панель не обнаружена, добавьте S1E Panel вручную и укажите её HTTPS-адрес.
-При повторном подключении откройте на панели **Настройки → Сопряжение**.
+1. In **HACS → ⋮ → Custom repositories** add `https://github.com/alexshemr/ha-s1e-panel`, category **Integration**.
+2. Install **S1E Panel** and restart Home Assistant.
+3. In **Settings → Devices & services** add the discovered panel.
+4. On the panel, tap **Allow: Home Assistant**.
 
-mDNS обнаруживает панель в одной локальной сети (IPv4). Между VLAN потребуется
-ретрансляция mDNS или ручной адрес. Отпечаток сертификата закрепляется при
-первом подключении в доверенной сети; подмена сертификата при последующем
-обнаружении не принимается автоматически.
+Requires panel firmware **0.5.0** or newer (**0.7.0** for pictures) and Home Assistant **2026.10.1** or newer. Connect the panel to your Wi-Fi first. There is no Home Assistant URL, token or pairing key to type.
 
-Компонент передаёт состояния, каталог устройств, время, прогноз и команды
-карточек через отдельное защищённое соединение с панелью. Он не создаёт и не
-передаёт ей токен HA. В HA хранится отдельный ключ панели; на панели — его хеш.
-Команды доступны для выбранных сущностей и поддерживаемых действий карточек.
-При удалении интеграции можно отозвать её ключ в редакторе панели.
+If the panel is not discovered, add **S1E Panel** manually with its HTTPS address (`https://<panel-ip>:8443`). Discovery uses mDNS on the local network (IPv4); across VLANs you need an mDNS repeater or the manual address. To pair again, open **Settings → Pair a device** on the panel first.
 
-## Обновление существующего подключения
+## How it connects
 
-Обновите интеграцию через HACS, перезапустите HA и обновите прошивку панели.
-Уже сохранённые ключ и отпечаток продолжают работать. После первого успешного
-обмена через интеграцию панель удалит свой сохранённый токен HA. Исходный токен
-в профиле HA автоматически не отзывается: он может использоваться другими
-приложениями. Прежний прямой способ остаётся в ручных настройках панели.
-Со старой прошивкой существующие настроенные подключения продолжают работать;
-новое сопряжение касанием требует 0.5.0+.
+The integration opens its own encrypted, certificate-pinned connection to the panel and serves it states, devices, time, weather forecasts, card commands and pictures. It never creates or sends a Home Assistant token. Home Assistant keeps a panel key; the panel keeps only its hash. The certificate fingerprint is pinned on first contact, and a changed certificate is not accepted silently. Commands work only for entities on the panel and the actions its cards use. When you remove the integration you can revoke its key in the panel's editor.
 
-Обновление HACS-компонента не обновляет прошивку. Для прошивки используйте
-**Проверить → Скачать → Установить** в настройках панели или веб-редакторе.
+Updating the integration in HACS does not update the panel's firmware: on the panel use **Settings → Panel update → Check → Download → Install**.
 
-## Заставки (интеграция 0.3.0, прошивка 0.4.0)
+## Entities and actions
 
-У устройства панели есть список **Заставка**: часы (`clock`), датчики (`sensors`), погода (`weather`), фото (`photo`), перемешивание (`shuffle`). Список возможностей поступает от панели. В автоматизациях используйте стандартное действие `select.select_option` и стабильный идентификатор режима, например `sensors`.
+- **Screen** (light): on/off and brightness; **night mode** (binary sensor); diagnostics.
+- **Relays** (switches) of the panel.
+- **Screensaver** (select): `clock`, `sensors`, `weather`, `photo`, `shuffle`. Use `select.select_option` with these ids in automations. The choice survives a restart; the night mode and screen-off from Home Assistant still take priority.
+- **`s1e_panel.show_message`**: a message with title, icon, type, priority, duration, a weather forecast or a **photo** from a camera or image entity (`image`, `live`).
+- **`s1e_panel.dismiss_notification`** and **`s1e_panel.clear_notifications`**.
 
-Выбор сохраняется после перезагрузки и действует до следующего переключения. Панель сразу показывает заставку, но не обходит ночной режим и выключение экрана из HA. Активное уведомление завершается перед показом выбранной заставки. Касание открывает карточки; после бездействия возвращается выбранный режим. Датчики и фотографии настраиваются в редакторе. Со старой прошивкой список недоступен, остальные сущности продолжают работать.
+## Photos and cameras
 
-[Пример автоматизации по мелким частицам](AUTOMATIONS.md#постоянная-заставка-по-уровню-мелких-частиц).
+The panel gets pictures over the same connection: camera frames on its cards (for example a 3D printer's camera: one frame every 2 s, every second in full screen), `image.*` entities (a slicer's model picture) and photos in messages. Home Assistant takes the snapshot, fits it to the screen and sends a JPEG. Only cameras on the panel's cards and cameras passed to `show_message` can be read. Video arrives as frames; the panel does not decode video streams.
 
-## Фото и камеры (интеграция 0.5.0, прошивка 0.7.0)
+See [AUTOMATIONS.md](AUTOMATIONS.md) for examples: a doorbell photo, tomorrow's weather when the curtain closes, the screen following presence, a screensaver for high fine dust.
 
-Панель получает картинки через это же соединение: кадры камер (например, камеры
-3D-принтера на его карточке, 1 кадр в 2 с, на весь экран — 1 кадр в секунду),
-картинки `image.*` (модель в слайсере) и фото в уведомлениях. Интеграция берёт
-снимок в Home Assistant, уменьшает его под экран и отправляет JPEG; токен HA
-панель не получает. Разрешены только камеры с карточек панели и камеры из
-вызова `s1e_panel.show_message` с `image` — [пример со звонком в дверь](AUTOMATIONS.md#звонок-в-дверь-фото-звонящего).
+## Install from ZIP
 
-## Установка из ZIP
+Download `ha-s1e-panel-<version>.zip` from [Releases](https://github.com/alexshemr/ha-s1e-panel/releases), copy `custom_components/s1e_panel` into your Home Assistant configuration folder and restart Home Assistant.
 
-Скачайте `ha-s1e-panel-0.5.0.zip` из Releases. Скопируйте каталог
-`custom_components/s1e_panel` в каталог конфигурации HA и перезапустите HA.
-Архив `-source.zip` предназначен для исходников отдельного репозитория.
+## License
 
-## English
-
-Install **S1E Panel** from the HACS custom repository
-`https://github.com/alexshemr/ha-s1e-panel` (Integration), restart Home Assistant,
-add the discovered panel and approve **Home Assistant** on its touchscreen.
-Firmware 0.5.0+ and integration 0.4.0+ are required for this setup.
-Configure panel Wi-Fi first. No HA URL or long-lived HA token is needed.
-If discovery is unavailable, add the integration manually using the panel HTTPS URL.
-For pairing again, open Settings → Pair a device on the panel first.
-
-The integration uses a dedicated, certificate-pinned connection to the panel
-for states, registries, time, weather and supported card commands. It does not
-mint or transmit HA tokens. Existing entries migrate after a successful exchange;
-the old token is then removed from the panel, but not revoked in the HA profile.
-Discovery uses IPv4 mDNS on the local network. Initial certificate trust is
-established on that network and subsequent certificate changes are rejected.
-
-MIT. Minimum supported Home Assistant: 2026.10.1. CI covers 2026.10.1 and 2026.10.4. Validation and device deployment
-results are recorded with each release. Inclusion in the default HACS catalog
-is a separate step; use the custom repository installation above.
-
-Версия 0.4.1 исправляет минимальную версию HA в HACS: 2026.10.1. Для нового подключения рекомендуется 0.4.1+.
+MIT.
