@@ -3,11 +3,9 @@
     "step": {
       "user": {
         "title": "Connect your S1E panel",
-        "description": "Create a Home Assistant key in the panel's browser editor. Copy the certificate fingerprint shown in settings.",
+        "description": "Panels are discovered on the local network. If yours is missing, enter its HTTPS address. Then approve the connection on the panel.",
         "data": {
-          "url": "Panel HTTPS address",
-          "token": "Pairing key",
-          "fingerprint": "Certificate SHA-256 fingerprint"
+          "url": "Panel HTTPS address"
         }
       },
       "reauth_confirm": {
@@ -17,6 +15,13 @@
           "token": "Pairing key",
           "fingerprint": "Certificate SHA-256 fingerprint"
         }
+      },
+      "confirm": {
+        "title": "Connect panel",
+        "description": "After Submit, approve the Home Assistant request by touching the panel. No HA address or token is needed."
+      },
+      "pair": {
+        "title": "Approve on the panel"
       }
     },
     "error": {
@@ -26,7 +31,14 @@
     "abort": {
       "already_configured": "This panel is already configured.",
       "wrong_device": "This is a different panel.",
-      "reauth_successful": "Pairing key updated."
+      "reauth_successful": "Pairing key updated.",
+      "invalid_discovery": "Invalid discovery data.",
+      "certificate_changed": "The panel certificate changed. Verify the device before pairing again.",
+      "pairing_failed": "Pairing did not complete. Open Settings → Pair a device on the panel and try again."
+    },
+    "flow_title": "{name}",
+    "progress": {
+      "physical_confirmation": "Tap “Allow: Home Assistant” on the panel. Waiting for up to two minutes."
     }
   },
   "entity": {
