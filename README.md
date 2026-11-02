@@ -11,9 +11,9 @@ The Home Assistant integration for the [S1E Panel](https://github.com/alexshemr/
 3. In **Settings → Devices & services** add the discovered panel.
 4. On the panel, tap **Allow: Home Assistant**.
 
-Requires panel firmware **0.5.0** or newer (**0.7.0** for pictures) and Home Assistant **2026.10.1** or newer. Connect the panel to your Wi-Fi first. There is no Home Assistant URL, token or pairing key to type.
+Requires panel firmware **0.5.0** or newer (**0.7.0** for pictures, **0.8.0** for the morning–day–evening forecast and the Moon screensaver) and Home Assistant **2026.10.1** or newer. Connect the panel to your Wi-Fi first. There is no Home Assistant URL, token or pairing key to type.
 
-If the panel is not discovered, add **S1E Panel** manually with its HTTPS address (`https://<panel-ip>:8443`). Discovery uses mDNS on the local network (IPv4); across VLANs you need an mDNS repeater or the manual address. To pair again, open **Settings → Pair a device** on the panel first.
+If the panel is not discovered, add **S1E Panel** manually with its HTTPS address (`https://<panel-ip>:8443`). Discovery uses mDNS on the local network (IPv4); across VLANs you need an mDNS repeater or the manual address. To pair again, add the integration and tap **Allow** on the panel: it lights up with the request (firmware 0.8.0; with older firmware open **Settings → Pair a device** on the panel first).
 
 ## How it connects
 

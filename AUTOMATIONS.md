@@ -276,6 +276,53 @@ actions:
           ttl: "{{ lifetime }}"
 ```
 
+### Morning, day and evening in a row
+
+`weather.parts` puts up to four columns at the bottom of the message, each with its own sky and temperature. Default names: Morning, Day, Evening, Night (`label` replaces one). Fields of a part: `condition`, `temperature`, `precipitation_probability`, `night`, `label`.
+
+To fill them from the hourly forecast, add these steps before `choose` and send `weather: "{{ weather_with_parts }}"` instead of `weather_payload`:
+
+```yaml
+  - action: weather.get_forecasts
+    continue_on_error: true
+    target:
+      entity_id: "{{ weather_entity }}"
+    data:
+      type: hourly
+    response_variable: hourly_response
+
+  - variables:
+      # The hour closest to 09:00, 14:00 and 19:00 of the target day.
+      weather_parts: >-
+        {% set hours = hourly_response.get(weather_entity, {}).get('forecast', []) %}
+        {% set ns = namespace(parts=[]) %}
+        {% for target in [9, 14, 19] %}
+          {% set best = namespace(item={}, gap=99) %}
+          {% for item in hours %}
+            {% set dt = as_datetime(item.get('datetime', ''), none) %}
+            {% if dt and (as_local(dt).date() | string) == target_day %}
+              {% set gap = (as_local(dt).hour - target) | abs %}
+              {% if gap < best.gap %}{% set best.item = item %}{% set best.gap = gap %}{% endif %}
+            {% endif %}
+          {% endfor %}
+          {% if best.item %}
+            {% set part = {'condition': best.item.get('condition', 'unknown')} %}
+            {% if best.item.get('temperature') is number %}
+              {% set part = dict(part, temperature=best.item.get('temperature')) %}
+            {% endif %}
+            {% if best.item.get('precipitation_probability') is number %}
+              {% set part = dict(part, precipitation_probability=[[best.item.get('precipitation_probability'), 0] | max, 100] | min) %}
+            {% endif %}
+            {% set ns.parts = ns.parts + [part] %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.parts }}
+      weather_with_parts: >-
+        {{ dict(weather_payload, parts=weather_parts) if weather_parts | length > 0 else weather_payload }}
+```
+
+Without an hourly forecast the message keeps the whole-day view.
+
 ### If the message does not appear
 
 1. **Developer tools → Template**: check the entities:

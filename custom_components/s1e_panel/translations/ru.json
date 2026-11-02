@@ -82,6 +82,7 @@
           "sensors": "Датчики",
           "weather": "Погода",
           "photo": "Фото",
+          "moon": "Луна",
           "shuffle": "Перемешивание"
         }
       }
@@ -105,7 +106,8 @@
           "name": "Заголовок"
         },
         "weather": {
-          "name": "Объект прогноза погоды"
+          "name": "Объект прогноза погоды",
+          "description": "Запись прогноза. Необязательный список parts (до четырёх: label, condition, temperature, precipitation_probability, night) показывается рядом: утро, день, вечер."
         },
         "background": {
           "name": "Фон"

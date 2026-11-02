@@ -24,6 +24,7 @@ show_message:
         text: {}
     weather:
       name: Weather forecast object
+      description: A forecast entry (condition, temperature, templow, wind_speed, ...). Optional parts — up to four of {label, condition, temperature, precipitation_probability, night} — are shown in a row as morning, day and evening.
       selector:
         object: {}
     background:
