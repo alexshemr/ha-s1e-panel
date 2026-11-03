@@ -17,7 +17,7 @@ SERVICES = {
     "humidifier": {"turn_on", "turn_off", "set_humidity", "set_mode"},
     "fan": {"turn_on", "turn_off", "toggle", "set_percentage", "set_preset_mode", "oscillate", "set_direction"},
     "cover": {"open_cover", "close_cover", "stop_cover", "set_cover_position"},
-    "climate": {"set_temperature", "set_hvac_mode", "set_preset_mode", "set_fan_mode", "turn_on", "turn_off"},
+    "climate": {"set_temperature", "set_hvac_mode", "set_preset_mode", "set_fan_mode", "set_swing_mode", "turn_on", "turn_off"},
     "media_player": {"media_play_pause", "media_play", "media_pause", "media_stop", "media_next_track", "media_previous_track", "volume_set", "volume_mute", "turn_on", "turn_off"},
     "scene": {"turn_on"}, "script": {"turn_on", "turn_off"},
     "button": {"press"}, "input_button": {"press"},
