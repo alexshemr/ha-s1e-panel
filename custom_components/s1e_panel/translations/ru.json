@@ -50,6 +50,12 @@
     "switch": {
       "relay": {
         "name": "Реле {channel}"
+      },
+      "night_mode": {
+        "name": "Ночной режим"
+      },
+      "night_schedule": {
+        "name": "Ночной режим по расписанию"
       }
     },
     "sensor": {
@@ -69,9 +75,6 @@
     "binary_sensor": {
       "ha_connection": {
         "name": "Подключение к Home Assistant"
-      },
-      "night_mode": {
-        "name": "Ночной режим"
       }
     },
     "select": {
@@ -85,6 +88,14 @@
           "moon": "Луна",
           "shuffle": "Перемешивание"
         }
+      }
+    },
+    "time": {
+      "night_start": {
+        "name": "Начало ночного режима"
+      },
+      "night_end": {
+        "name": "Конец ночного режима"
       }
     }
   },

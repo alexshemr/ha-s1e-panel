@@ -5,7 +5,7 @@ from urllib.parse import quote
 import voluptuous as vol
 from homeassistant.core import ServiceCall
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .client import PanelClient, PanelError
 from .const import DOMAIN, PLATFORMS
@@ -19,6 +19,10 @@ async def async_setup_entry(hass, entry):
     coordinator = PanelCoordinator(hass, PanelClient(async_get_clientsession(hass), **entry.data), entry)
     await coordinator.async_config_entry_first_refresh()
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    # Night mode was a read-only sensor before 0.5.3; it is a switch now.
+    registry = er.async_get(hass)
+    if old := registry.async_get_entity_id("binary_sensor", DOMAIN, f"{coordinator.data['device_id']}_night_mode"):
+        registry.async_remove(old)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     coordinator.start()
 

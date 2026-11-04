@@ -23,7 +23,7 @@ Updating the integration in HACS does not update the panel's firmware: on the pa
 
 ## Entities and actions
 
-- **Screen** (light): on/off and brightness; **night mode** (binary sensor); diagnostics.
+- **Screen** (light): on/off and brightness; **night mode** (switch: on or off by hand until the schedule next turns), its schedule (switch) and start and end times (time); diagnostics.
 - **Relays** (switches) of the panel.
 - **Screensaver** (select): `clock`, `sensors`, `weather`, `photo`, `shuffle`. Use `select.select_option` with these ids in automations. The choice survives a restart; the night mode and screen-off from Home Assistant still take priority.
 - **`s1e_panel.show_message`**: a message with title, icon, type, priority, duration, a weather forecast or a **photo** from a camera or image entity (`image`, `live`).

@@ -1,6 +1,6 @@
 # Automation examples
 
-Replace `light.panel_screen`, `binary_sensor.panel_night_mode`, `binary_sensor.room_presence`, `cover.living_room`, `weather.home` and `PANEL_DEVICE_ID` with your own. You don't have to look up the device ID: the template `{{ device_id('light.panel_screen') }}` returns it from any panel entity. To see the ID itself, pick the panel in the visual editor of the **Show message** action and switch to YAML.
+Replace `light.panel_screen`, `switch.panel_night_mode`, `binary_sensor.room_presence`, `cover.living_room`, `weather.home` and `PANEL_DEVICE_ID` with your own. You don't have to look up the device ID: the template `{{ device_id('light.panel_screen') }}` returns it from any panel entity. To see the ID itself, pick the panel in the visual editor of the **Show message** action and switch to YAML.
 
 ## Screen on with presence
 
@@ -34,6 +34,27 @@ actions:
         target:
           entity_id: light.panel_screen
 mode: restart
+```
+
+## Curtain closes in the evening: night mode now
+
+Night mode turned on by hand holds until the schedule takes over at its start time, then ends in the morning as usual. Turned off by hand during the night, it stays off until the morning. The times themselves are `time.panel_night_mode_start` and `time.panel_night_mode_end`; `switch.panel_night_mode_schedule` turns the schedule off.
+
+```yaml
+alias: Panel night mode when the curtain closes
+triggers:
+  - trigger: state
+    entity_id: cover.living_room
+    to: closed
+conditions:
+  - condition: time
+    after: "21:00:00"
+    before: "05:00:00"
+actions:
+  - action: switch.turn_on
+    target:
+      entity_id: switch.panel_night_mode
+mode: single
 ```
 
 ## Curtain closes: tomorrow's weather with advice
@@ -77,7 +98,7 @@ actions:
         {{ weather_preferred if has_value(weather_preferred)
            else (states.weather | rejectattr('state', 'in', ['unavailable', 'unknown']) | map(attribute='entity_id') | first
                  | default(weather_preferred)) }}
-      night_sensor: binary_sensor.panel_night_mode
+      night_sensor: switch.panel_night_mode
       panel_device: "{{ device_id('light.panel_screen') }}"
       forecast_response: {}
       # After midnight "tomorrow" is the day that has already begun.

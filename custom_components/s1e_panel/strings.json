@@ -50,6 +50,12 @@
     "switch": {
       "relay": {
         "name": "Relay {channel}"
+      },
+      "night_mode": {
+        "name": "Night mode"
+      },
+      "night_schedule": {
+        "name": "Night mode schedule"
       }
     },
     "sensor": {
@@ -69,9 +75,6 @@
     "binary_sensor": {
       "ha_connection": {
         "name": "Home Assistant connection"
-      },
-      "night_mode": {
-        "name": "Night mode"
       }
     },
     "select": {
@@ -85,6 +88,14 @@
           "moon": "Moon",
           "shuffle": "Shuffle"
         }
+      }
+    },
+    "time": {
+      "night_start": {
+        "name": "Night mode start"
+      },
+      "night_end": {
+        "name": "Night mode end"
       }
     }
   },
